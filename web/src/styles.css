@@ -534,6 +534,7 @@ a.btn { text-decoration: none; display: inline-block; }
 .blank {
     border: 1px dashed var(--rule);
     border-radius: var(--radius);
+    margin: 15px 0px 0px 0px;
     padding: 2.4rem 1.6rem;
     color: var(--muted);
     font-size: 0.85rem;
