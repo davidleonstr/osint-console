@@ -133,6 +133,23 @@ def interpreter(repo: Path) -> str:
             return str(candidate)
     return sys.executable
 
+def venv_console(repo: Path, name: str) -> str:
+    """
+    Console script installed inside the repo's own virtualenv, if any.
+
+    Some tools (holehe among them) ship a library module with no working
+    `__main__`; only the installed console script (the setuptools entry
+    point) actually runs anything. Checked before falling back to a guessed
+    `python -m <module>` invocation, so a package directory existing on disk
+    is never mistaken for that module being runnable.
+    """
+    rel = ('Scripts/%s.exe' % name) if IS_WINDOWS else ('bin/' + name)
+    for venvname in ('.venv', 'venv', 'env'):
+        candidate = repo / venvname / rel
+        if candidate.is_file():
+            return str(candidate)
+    return ''
+
 @dataclass
 class Discovery:
     id: str
@@ -162,6 +179,15 @@ def discover_one(spec: ToolSpec, root: Path) -> Discovery:
         found.repo = str(repo)
         py = interpreter(repo)
         found.python = py
+
+        if spec.console:
+            console_path = venv_console(repo, spec.console)
+            if console_path:
+                found.available = True
+                found.argv = [console_path]
+                found.cwd = str(repo)
+                found.how = spec.console + ' (repo venv)'
+                return found
 
         for module in spec.modules:
             probe = repo / (module.split('.')[0])
@@ -326,9 +352,6 @@ def build_argv(found: Discovery, target: str, kind: str, opts: dict,
         flag = first_supported(help_txt, '--only-used', '--onlyused')
         if flag:
             argv.append(flag)
-        flag = first_supported(help_txt, '--timeout', '-T')
-        if flag:
-            argv += [flag, timeout]
 
     elif found.id == 'blackbird':
         flag = first_supported(help_txt, '--email' if kind == 'email' else '--username',
