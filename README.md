@@ -37,7 +37,7 @@ Backend:
 ```powershell
 cd osint-console\server
 pip install -r requirements.txt
-python api.py --port 8420
+python app.py --port 8420
 ```
 
 Frontend, in a second terminal. During development Vite serves on 5173 and
