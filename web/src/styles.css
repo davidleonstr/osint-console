@@ -7,6 +7,11 @@
    text. Everything else stays quiet so that pattern carries.
    ========================================================================== */
 
+/* Hide scroll bar */
+&::-webkit-scrollbar {
+    display: none;
+}
+
 :root {
     --ink: #0b1017;
     --panel: #121a24;
